@@ -1,0 +1,618 @@
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import React, { useEffect } from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  useSharedValue,
+} from "react-native-reanimated";
+import { Feather } from "@expo/vector-icons";
+import LeadScreen from "../componants/screen/LeadScreen";
+import HomeScreen from "../componants/screen/HomeScreen";
+import Profile from "../componants/screen/Profile";
+import LevelStepper from "../componants/pages/LevelStepper";
+import LessonScreen from "../componants/pages/LessonScreen";
+
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+const { width } = Dimensions.get("window");
+
+const HomeStack = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName="Homes"
+    >
+      <Stack.Screen name="Homes" component={HomeScreen} />
+      <Stack.Screen name="LevelStepper" component={LevelStepper} />
+      <Stack.Screen name="Lesson" component={LessonScreen} />
+    </Stack.Navigator>
+  );
+};
+
+const CustomTabBar = ({ state, descriptors, navigation }) => {
+  const translateX = useSharedValue(width / 3);
+  const itemWidth = width / 3;
+
+  useEffect(() => {
+    translateX.value = 0;
+  }, []);
+
+  const circleAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
+
+  const getIcon = (index, isFocused) => {
+    const color = isFocused ? "#6c5ce7" : "#9e9ea7";
+    const size = 24;
+
+    switch (index) {
+      case 0:
+        return <Feather name="home" size={size} color={color} />;
+      case 1:
+        return <Feather name="bar-chart-2" size={size} color={color} />;
+      case 2:
+        return <Feather name="user" size={size} color={color} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.tabBarContainer}>
+        {/* Floating Circle Background */}
+        <Animated.View
+          style={[styles.floatingBackground, circleAnimatedStyle]}
+        />
+
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const isFocused = state.index === index;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              translateX.value = withSpring(index * itemWidth, {
+                damping: 15,
+                stiffness: 100,
+                mass: 1,
+              });
+              navigation.navigate(route.name);
+            }
+          };
+
+          return (
+            <TouchableOpacity
+              key={index}
+              style={styles.tab}
+              onPress={onPress}
+              activeOpacity={0.7}
+            >
+              <View style={styles.iconContainer}>
+                {getIcon(index, isFocused)}
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+};
+
+const TabNavigator = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <CustomTabBar {...props} />}
+    >
+      <Tab.Screen name="Home" component={HomeStack} />
+      <Tab.Screen name="Lead" component={LeadScreen} />
+      <Tab.Screen name="Profile" component={Profile} />
+    </Tab.Navigator>
+  );
+};
+
+export default function Router() {
+  return <TabNavigator />;
+}
+
+const styles = StyleSheet.create({
+  container: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  tabBarContainer: {
+    flexDirection: "row",
+    height: 70,
+    backgroundColor: "white",
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: -4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    position: "relative",
+    paddingHorizontal: 10,
+  },
+  floatingBackground: {
+    position: "absolute",
+    width: width / 3 - 20,
+    height: 50,
+    backgroundColor: "#F0EEFF",
+    borderRadius: 15,
+    top: 10,
+    left: 10,
+  },
+  tab: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+  },
+  iconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 50,
+    height: 50,
+  },
+});
+
+
+
+
+
+// router.jsx
+
+
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import React, { useEffect } from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  useSharedValue,
+  interpolate,
+  withTiming,
+} from "react-native-reanimated";
+import { Ionicons } from "@expo/vector-icons";
+import LeadScreen from "../componants/screen/LeadScreen";
+import HomeScreen from "../componants/screen/HomeScreen";
+import Profile from "../componants/screen/Profile";
+import LevelStepper from "../componants/pages/LevelStepper";
+import LessonScreen from "../componants/pages/LessonScreen";
+
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+const { width } = Dimensions.get("window");
+
+const HomeStack = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName="Homes"
+    >
+      <Stack.Screen name="Homes" component={HomeScreen} />
+      <Stack.Screen name="LevelStepper" component={LevelStepper} />
+      <Stack.Screen name="Lesson" component={LessonScreen} />
+    </Stack.Navigator>
+  );
+};
+
+const CustomTabBar = ({ state, descriptors, navigation }) => {
+  const translateX = useSharedValue(0);
+  const itemWidth = width / 3;
+
+  // Shared values for each tab's icon animation
+  const iconY = [useSharedValue(0), useSharedValue(0), useSharedValue(0)];
+
+  useEffect(() => {
+    // Set initial position for the circle (Home tab)
+    translateX.value = 0;
+    // Animate up the Home icon initially
+    iconY[0].value = withSpring(-10);
+  }, []);
+
+  const circleAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
+
+  const getIconAnimatedStyle = (index) => {
+    return useAnimatedStyle(() => {
+      return {
+        transform: [{ translateY: iconY[index].value }],
+      };
+    });
+  };
+
+  const getIcon = (index, isFocused) => {
+    const color = isFocused ? "white" : "#9e9ea7";
+    const size = 24;
+
+    switch (index) {
+      case 0:
+        return (
+          <Ionicons
+            name={isFocused ? "home" : "home-outline"}
+            size={size}
+            color={color}
+          />
+        );
+      case 1:
+        return <Ionicons name="stats-chart" size={size} color={color} />;
+      case 2:
+        return (
+          <Ionicons
+            name={isFocused ? "person" : "person-outline"}
+            size={size}
+            color={color}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <View style={styles.tabBarContainer}>
+      {/* Animated Background Circle */}
+      <Animated.View style={[styles.activeBackground, circleAnimatedStyle]} />
+
+      {state.routes.map((route, index) => {
+        const { options } = descriptors[route.key];
+        const isFocused = state.index === index;
+
+        const onPress = () => {
+          const event = navigation.emit({
+            type: "tabPress",
+            target: route.key,
+          });
+
+          if (!isFocused && !event.defaultPrevented) {
+            // Animate the circle to the new position
+            translateX.value = withSpring(index * itemWidth, {
+              damping: 15,
+              stiffness: 100,
+            });
+
+            // Reset all icon positions
+            iconY.forEach((y, i) => {
+              y.value = withSpring(0);
+            });
+
+            // Animate the selected icon up
+            iconY[index].value = withSpring(-10);
+
+            navigation.navigate(route.name);
+          }
+        };
+
+        return (
+          <TouchableOpacity
+            key={index}
+            style={[styles.tab]}
+            onPress={onPress}
+            activeOpacity={0.7}
+          >
+            <Animated.View
+              style={[styles.iconContainer, getIconAnimatedStyle(index)]}
+            >
+              {getIcon(index, isFocused)}
+              <Text
+                style={[
+                  styles.tabLabel,
+                  { color: isFocused ? "white" : "#9e9ea7" },
+                ]}
+              >
+                {route.name}
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
+const TabNavigator = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <CustomTabBar {...props} />}
+    >
+      <Tab.Screen name="Home" component={HomeStack} />
+      <Tab.Screen name="Lead" component={LeadScreen} />
+      <Tab.Screen name="Profile" component={Profile} />
+    </Tab.Navigator>
+  );
+};
+
+export default function Router() {
+  return <TabNavigator />;
+}
+
+const styles = StyleSheet.create({
+  tabBarContainer: {
+    flexDirection: "row",
+    height: 80,
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: -4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    position: "relative",
+  },
+  activeBackground: {
+    position: "absolute",
+    width: width / 3,
+    height: 60,
+    backgroundColor: "#6c5ce7",
+    borderRadius: 30,
+    top: 10,
+    left: 0,
+  },
+  tab: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 80,
+  },
+  iconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 4,
+  },
+  tabLabel: {
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: "500",
+  },
+});
+
+
+
+router.jsx
+
+
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  useSharedValue,
+  interpolate,
+} from "react-native-reanimated";
+import { Ionicons } from "@expo/vector-icons";
+import LeadScreen from "../componants/screen/LeadScreen";
+import HomeScreen from "../componants/screen/HomeScreen";
+import Profile from "../componants/screen/Profile";
+import LevelStepper from "../componants/pages/LevelStepper";
+import LessonScreen from "../componants/pages/LessonScreen";
+
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+const HomeStack = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName="Homes"
+    >
+      <Stack.Screen name="Homes" component={HomeScreen} />
+      <Stack.Screen name="LevelStepper" component={LevelStepper} />
+      <Stack.Screen name="Lesson" component={LessonScreen} />
+    </Stack.Navigator>
+  );
+};
+
+const CustomTabBar = ({ state, descriptors, navigation }) => {
+  const translateY = useSharedValue(0);
+
+  const tabWidth = 70;
+  const tabHeight = 70;
+
+  const getTabStyle = (index) => {
+    if (index === 1) {
+      // Center tab
+      return {
+        width: tabWidth,
+        height: tabHeight,
+        backgroundColor: "#6c5ce7",
+        borderRadius: 35,
+        position: "absolute",
+        top: -20,
+        left: "50%",
+        marginLeft: -35,
+        elevation: 5,
+        shadowColor: "#6c5ce7",
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      };
+    }
+    return {};
+  };
+
+  const getIconColor = (index, isFocused) => {
+    if (index === 1) return "white";
+    return isFocused ? "#6c5ce7" : "#9e9ea7";
+  };
+
+  const getIcon = (index, isFocused) => {
+    const color = getIconColor(index, isFocused);
+    const size = 24;
+
+    switch (index) {
+      case 0:
+        return (
+          <Ionicons
+            name={isFocused ? "home" : "home-outline"}
+            size={size}
+            color={color}
+          />
+        );
+      case 1:
+        return <Ionicons name="stats-chart" size={size} color={color} />;
+      case 2:
+        return (
+          <Ionicons
+            name={isFocused ? "person" : "person-outline"}
+            size={size}
+            color={color}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  const animatedStyles = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }],
+    };
+  });
+
+  return (
+    <View style={styles.tabBarContainer}>
+      {state.routes.map((route, index) => {
+        const { options } = descriptors[route.key];
+        const isFocused = state.index === index;
+
+        const onPress = () => {
+          const event = navigation.emit({
+            type: "tabPress",
+            target: route.key,
+          });
+
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+
+          if (index === 1) {
+            // Animate center tab
+            translateY.value = withSpring(-20, {
+              damping: 10,
+              stiffness: 100,
+            });
+            setTimeout(() => {
+              translateY.value = withSpring(0);
+            }, 200);
+          }
+        };
+
+        return (
+          <TouchableOpacity
+            key={index}
+            style={[styles.tab, getTabStyle(index)]}
+            onPress={onPress}
+            activeOpacity={0.7}
+          >
+            <Animated.View
+              style={[index === 1 && animatedStyles, styles.tabContent]}
+            >
+              {getIcon(index, isFocused)}
+              <Text
+                style={[
+                  styles.tabLabel,
+                  { color: getIconColor(index, isFocused) },
+                ]}
+              >
+                {route.name}
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+};
+
+const TabNavigator = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <CustomTabBar {...props} />}
+    >
+      <Tab.Screen name="Home" component={HomeStack} />
+      <Tab.Screen name="Lead" component={LeadScreen} />
+      <Tab.Screen name="Profile" component={Profile} />
+    </Tab.Navigator>
+  );
+};
+
+export default function Router() {
+  return <TabNavigator />;
+}
+
+const styles = StyleSheet.create({
+  tabBarContainer: {
+    flexDirection: "row",
+    height: 80,
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: -4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    paddingBottom: 8,
+  },
+  tab: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  tabContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 4,
+  },
+  tabLabel: {
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: "500",
+  },
+});
